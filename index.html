@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ 你最像哪種小動物？ ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --oatmeal-bg: #f2ede4; /* 燕麥色背景 */
+            --oatmeal-dark: #e5ddd0;
+            --text-color: #5a544b;
+            --accent-color: #a68b6d;
+            --white: #ffffff;
+        }
+
+        body {
+            background-color: var(--oatmeal-bg);
+            color: var(--text-color);
+            font-family: 'Noto Serif TC', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #quiz-container {
+            background-color: var(--white);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 10px; color: var(--accent-color); }
+        p.subtitle { margin-bottom: 30px; opacity: 0.8; }
+
+        .question-text { font-size: 1.4rem; margin-bottom: 25px; font-weight: 700; }
+
+        /* 按鈕樣式：大圓角、優雅色調 */
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border: 2px solid var(--oatmeal-dark);
+            background-color: transparent;
+            color: var(--text-color);
+            border-radius: 50px; /* 大圓角 */
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* 結果頁面樣式 */
+        .result-img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 20px auto;
+            border: 5px solid var(--oatmeal-bg);
+        }
+
+        .result-title { font-size: 2rem; margin: 10px 0; color: var(--accent-color); }
+        .result-desc { line-height: 1.8; text-align: left; background: var(--oatmeal-bg); padding: 20px; border-radius: 20px; }
+
+        .hidden { display: none; }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--oatmeal-dark);
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div id="start-screen">
+        <h1>✨ 你最像哪種小動物？ ✨</h1>
+        <p class="subtitle">探索隱藏在性格裡的可愛靈魂</p>
+        <button class="option-btn" onclick="startQuiz()">開始測驗</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <div class="question-text" id="question">題目載入中...</div>
+        <div id="options">
+            </div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <div id="result-content">
+            <h2 id="animal-name"></h2>
+            <img id="animal-img" class="result-img" src="" alt="animal">
+            <div class="result-desc" id="animal-desc"></div>
+            <button class="option-btn" style="margin-top: 30px;" onclick="location.reload()">再測一次</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "1️⃣ 假日你最常做什麼？", a: {A: "和朋友出去玩", B: "一個人追劇或滑手機", C: "做點有挑戰性的事", D: "睡到自然醒"} },
+        { q: "2️⃣ 在朋友眼中，你比較像？", a: {A: "很好相處、很暖", B: "有點神秘、不太愛說話", C: "很聰明、點子多", D: "安靜可愛型"} },
+        { q: "3️⃣ 遇到不熟的人，你通常會？", a: {A: "主動聊天", B: "先觀察一下", C: "用幽默化解尷尬", D: "有點緊張，但還是會微笑"} },
+        { q: "4️⃣ 你最喜歡的天氣是？", a: {A: "晴天", B: "下雨天", C: "涼爽微風", D: "冬天窩在室內"} },
+        { q: "5️⃣ 如果今天心情不好，你會？", a: {A: "找人聊天", B: "自己消化情緒", C: "做點別的事轉移注意力", D: "吃點好吃的"} },
+        { q: "6️⃣ 在團體中，你通常是？", a: {A: "氣氛製造者", B: "默默聽大家說話的人", C: "出主意的人", D: "跟著大家就好"} },
+        { q: "7️⃣ 你比較嚮往哪種生活？", a: {A: "熱鬧、有很多朋友", B: "安靜、自在", C: "有挑戰、很自由", D: "穩定、舒服"} },
+        { q: "8️⃣ 選一個你最喜歡的詞", a: {A: "陪伴", B: "自由", C: "聰明", D: "溫柔"} }
+    ];
+
+    const results = {
+        A: { 
+            name: "🐶 熱情的小狗型", 
+            desc: "你就像一隻充滿活力的小狗！溫暖、忠誠且熱愛社交。你的出現總能帶給身邊的人快樂，大家都很依賴你的開朗能量。",
+            img: "https://play.google.com/store/apps/details?id=st.harrison.dog&hl=zh_TW"
+        },
+        B: { 
+            name: "🐱 獨立的小貓型", 
+            desc: "你有著貓咪般的優雅與神祕感。雖然外表看起來安靜、甚至有點高冷，但對熟悉的人會展現最柔軟的一面。你很享受獨處的自由。",
+            img: "https://www.afurkid.com/Article/show/10152"
+        },
+        C: { 
+            name: "🦊 聰明的狐狸型", 
+            desc: "你頭腦靈活，觀察力敏銳！遇到問題總能想出獨特的解決辦法。你嚮往自由且充滿挑戰的生活，是不折不扣的智慧派。",
+            img: "https://www.reddit.com/r/aww/comments/dq3a7r/who_else_thinks_baby_foxes_are_the_cutest_beings/?tl=zh-hant"
+        },
+        D: { 
+            name: "🐰 溫柔的兔子型", 
+            desc: "你是一個內心非常細膩、溫柔的人。你嚮往穩定與舒服的生活環境，雖然有時候會害羞，但那種親和力讓人非常想保護你。",
+            img: "https://www.hk01.com/%E5%AF%B5%E7%89%A9/993050/%E8%83%BD%E6%95%99%E6%9B%89%E5%B0%8F%E5%85%94%E5%AD%90%E5%AE%9A%E9%BB%9E%E4%B8%8A%E5%BB%81%E6%89%80%E5%97%8E-%E6%93%BA%E6%94%BE%E4%BD%8D%E7%BD%AE%E5%BE%88%E8%AC%9B%E7%A9%B6-%E9%82%84%E8%A6%81%E5%A0%85%E6%8C%81%E8%A8%93%E7%B7%B4%E6%89%8D%E5%8F%AF"
+        }
+    };
+
+    let currentIdx = 0;
+    let scores = { A: 0, B: 0, C: 0, D: 0 };
+
+    function startQuiz() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if (currentIdx < questions.length) {
+            const q = questions[currentIdx];
+            document.getElementById('question').innerText = q.q;
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            
+            // 更新進度條
+            document.getElementById('progress').style.width = ((currentIdx / questions.length) * 100) + '%';
+
+            for (let key in q.a) {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = q.a[key];
+                btn.onclick = () => nextQuestion(key);
+                optionsDiv.appendChild(btn);
+            }
+        } else {
+            showResult();
+        }
+    }
+
+    function nextQuestion(answer) {
+        scores[answer]++;
+        currentIdx++;
+        showQuestion();
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+
+        // 計算最高分
+        let maxKey = 'A';
+        for (let key in scores) {
+            if (scores[key] > scores[maxKey]) maxKey = key;
+        }
+
+        const result = results[maxKey];
+        document.getElementById('animal-name').innerText = result.name;
+        document.getElementById('animal-desc').innerText = result.desc;
+        document.getElementById('animal-img').src = result.img;
+    }
+</script>
+
+</body>
+</html>
