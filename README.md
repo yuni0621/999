@@ -1,3 +1,5 @@
+# 999
+由 EZPage 建立的網站 - Deployed by EZPage
 #🚀 2024 Vibe Coding 期末專案：[心理測驗_✨你最喜歡哪一種小動物？ ✨ㄒ
 🌟 1.專題願景（Vibe）
 目標對象：任意年齡
